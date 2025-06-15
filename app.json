@@ -39,6 +39,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5e53b20f-f8ef-4364-98fb-d1213885f81b"
+      }
+    },
+    "owner": "rochan"
   }
 }

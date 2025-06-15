@@ -23,4 +23,5 @@ export interface MiniApp {
   updated_at: string;
   is_featured?: boolean;
   tags?: string[];
+  deployment_id?: string;
 }

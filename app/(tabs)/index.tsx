@@ -3,8 +3,9 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { MiniApp, supabase } from "@/lib/supabase";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, FlatList, RefreshControl, View } from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 
 export default function HomeScreen() {
   const [apps, setApps] = useState<MiniApp[]>([]);
@@ -22,93 +23,16 @@ export default function HomeScreen() {
 
       if (error) {
         console.error("Error loading apps:", error);
-        // For now, use mock data if Supabase isn't configured
-        setApps(getMockApps());
-        setFeaturedApps(getMockApps().filter((app) => app.is_featured));
       } else if (data) {
         setApps(data);
         setFeaturedApps(data.filter((app) => app.is_featured));
       }
     } catch (error) {
       console.error("Error connecting to Supabase:", error);
-      // Use mock data as fallback
-      setApps(getMockApps());
-      setFeaturedApps(getMockApps().filter((app) => app.is_featured));
     } finally {
       setLoading(false);
     }
   };
-
-  // Mock data for development/demo purposes
-  const getMockApps = (): MiniApp[] => [
-    {
-      id: "1",
-      name: "Weather Pro",
-      description:
-        "Beautiful weather app with 7-day forecast and location tracking",
-      category: "Utilities",
-      version: "1.0.0",
-      rating: 4.8,
-      downloads: 15420,
-      is_featured: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      tags: ["weather", "forecast", "location"],
-    },
-    {
-      id: "2",
-      name: "Task Master",
-      description: "Simple and elegant todo list with reminders and categories",
-      category: "Productivity",
-      version: "2.1.0",
-      rating: 4.6,
-      downloads: 8930,
-      is_featured: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      tags: ["todo", "tasks", "productivity"],
-    },
-    {
-      id: "3",
-      name: "Color Palette",
-      description: "Generate beautiful color palettes for your design projects",
-      category: "Design",
-      version: "1.2.0",
-      rating: 4.5,
-      downloads: 3210,
-      is_featured: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      tags: ["design", "colors", "palette"],
-    },
-    {
-      id: "4",
-      name: "Quick Calculator",
-      description: "Fast and intuitive calculator with scientific functions",
-      category: "Utilities",
-      version: "1.0.5",
-      rating: 4.3,
-      downloads: 12680,
-      is_featured: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      tags: ["calculator", "math", "utilities"],
-    },
-    {
-      id: "5",
-      name: "Meditation Timer",
-      description:
-        "Peaceful meditation timer with nature sounds and guided sessions",
-      category: "Health",
-      version: "1.1.0",
-      rating: 4.9,
-      downloads: 6754,
-      is_featured: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      tags: ["meditation", "mindfulness", "wellness"],
-    },
-  ];
 
   useEffect(() => {
     loadApps();
@@ -121,17 +45,8 @@ export default function HomeScreen() {
   };
 
   const handleAppPress = (app: MiniApp) => {
-    Alert.alert(
-      app.name,
-      `${app.description}\n\nVersion: ${app.version}\nCategory: ${app.category}`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Install",
-          onPress: () => console.log("Installing app:", app.name),
-        },
-      ]
-    );
+    // Navigate to the mini-app screen
+    router.push(`/mini-app/${app.id}` as any);
   };
 
   const renderHeader = () => (
