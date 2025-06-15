@@ -51,7 +51,7 @@ export default function HomeScreen() {
 
   const renderHeader = () => (
     <ThemedView className="p-5 pt-16">
-      <View className="flex-row items-center gap-3 mb-2">
+      <View className="flex-row items-center gap-3 mb-2 mt-10">
         <IconSymbol name="app.fill" size={32} color="#007AFF" />
         <ThemedText type="title" className="text-3xl font-bold">
           Micro Apps

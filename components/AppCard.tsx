@@ -27,7 +27,7 @@ export function AppCard({ app, onPress }: AppCardProps) {
             />
           ) : (
             <View className="w-15 h-15 rounded-xl bg-gray-100 justify-center items-center">
-              <IconSymbol name="app.fill" size={32} color="#666" />
+              <ThemedText className="text-2xl">📱</ThemedText>
             </View>
           )}
         </View>

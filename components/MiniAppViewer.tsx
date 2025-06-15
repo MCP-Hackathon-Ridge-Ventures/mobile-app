@@ -1,4 +1,5 @@
 import { BundleFile } from "@/lib/bundleLoader";
+import { BridgedWebView } from "@/lib/miniAppBridge";
 import StaticServer from "@dr.pogodin/react-native-static-server";
 import * as FileSystem from "expo-file-system";
 import { router } from "expo-router";
@@ -10,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { WebView } from "react-native-webview";
 import { ThemedText } from "./ThemedText";
 import { IconSymbol } from "./ui/IconSymbol";
 
@@ -177,100 +177,6 @@ export function MiniAppViewer({
     }
   };
 
-  const handleWebViewMessage = (event: any) => {
-    try {
-      const message = JSON.parse(event.nativeEvent.data);
-      console.log("Message from mini-app:", message);
-
-      switch (message.type) {
-        case "CLOSE":
-          handleClose();
-          break;
-        case "LOG":
-          console.log("🚀 Mini-app log:", message.data);
-          break;
-        case "READY":
-          console.log("✅ Mini-app is ready");
-          break;
-        default:
-          console.log("Unknown message from mini-app:", message);
-      }
-    } catch (error) {
-      console.warn("Failed to parse message from mini-app:", error);
-    }
-  };
-
-  const injectJavaScript = `
-    (function() {
-      console.log('🚀 MiniApp WebView initialized with local server');
-      
-      // Inject host API for the mini-app
-      window.MiniAppHost = {
-        close: function() {
-          console.log('MiniApp requesting close');
-          if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({
-              type: 'CLOSE'
-            }));
-          }
-        },
-        log: function(message) {
-          if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({
-              type: 'LOG',
-              data: message
-            }));
-          }
-        },
-        getHostInfo: function() {
-          return {
-            version: '1.0.0',
-            platform: 'mobile',
-            isWebView: true,
-            hasLocalServer: true
-          };
-        }
-      };
-
-      // Override console methods to send to host
-      const originalLog = console.log;
-      const originalError = console.error;
-      const originalWarn = console.warn;
-      
-      console.log = function(...args) {
-        originalLog.apply(console, args);
-        if (window.MiniAppHost && window.MiniAppHost.log) {
-          window.MiniAppHost.log('LOG: ' + args.join(' '));
-        }
-      };
-      
-      console.error = function(...args) {
-        originalError.apply(console, args);
-        if (window.MiniAppHost && window.MiniAppHost.log) {
-          window.MiniAppHost.log('ERROR: ' + args.join(' '));
-        }
-      };
-      
-      console.warn = function(...args) {
-        originalWarn.apply(console, args);
-        if (window.MiniAppHost && window.MiniAppHost.log) {
-          window.MiniAppHost.log('WARN: ' + args.join(' '));
-        }
-      };
-
-      // Notify when ready
-      window.addEventListener('load', function() {
-        console.log('📄 Mini-app loaded in local server');
-        if (window.ReactNativeWebView) {
-          window.ReactNativeWebView.postMessage(JSON.stringify({
-            type: 'READY'
-          }));
-        }
-      });
-    })();
-    true;
-  `;
-
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-white">
@@ -350,9 +256,7 @@ export function MiniAppViewer({
 
       {/* Header */}
       <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
-        <TouchableOpacity onPress={handleClose} className="p-2">
-          <IconSymbol name="chevron.left" size={20} color="#007AFF" />
-        </TouchableOpacity>
+        <View className="w-8" />
         <ThemedText type="subtitle" className="flex-1 text-center">
           {appName}
         </ThemedText>
@@ -361,12 +265,10 @@ export function MiniAppViewer({
         </TouchableOpacity>
       </View>
 
-      {/* WebView with Local Server */}
+      {/* WebView with Bridge */}
       <View className="flex-1">
-        <WebView
+        <BridgedWebView
           source={{ uri: serverUrl }}
-          onMessage={handleWebViewMessage}
-          injectedJavaScript={injectJavaScript}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           startInLoadingState={true}
@@ -383,21 +285,21 @@ export function MiniAppViewer({
               </ThemedText>
             </View>
           )}
-          onError={(syntheticEvent) => {
+          onError={(syntheticEvent: any) => {
             const { nativeEvent } = syntheticEvent;
             console.error("WebView error:", nativeEvent);
             setError("Something went wrong loading this app");
           }}
-          onLoadStart={(syntheticEvent) => {
+          onLoadStart={(syntheticEvent: any) => {
             console.log("WebView load start:", syntheticEvent.nativeEvent.url);
           }}
-          onLoadEnd={(syntheticEvent) => {
+          onLoadEnd={(syntheticEvent: any) => {
             console.log(
               "WebView loaded successfully:",
               syntheticEvent.nativeEvent.url
             );
           }}
-          onHttpError={(syntheticEvent) => {
+          onHttpError={(syntheticEvent: any) => {
             console.error("WebView HTTP error:", syntheticEvent.nativeEvent);
           }}
           style={{ flex: 1 }}

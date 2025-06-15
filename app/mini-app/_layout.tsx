@@ -6,6 +6,8 @@ export default function MiniAppLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
+        // Disable back button
+        headerBackButtonDisplayMode: "minimal",
       }}
     />
   );
